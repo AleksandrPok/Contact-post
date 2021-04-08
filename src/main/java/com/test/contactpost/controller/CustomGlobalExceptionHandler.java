@@ -7,7 +7,7 @@ import lombok.Data;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -32,11 +32,11 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     }
 
     @Override
-    protected ResponseEntity<Object> handleMissingServletRequestParameter(
-            MissingServletRequestParameterException ex,
-            HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex, HttpHeaders headers,
+            HttpStatus status, WebRequest request) {
         return new ResponseEntity<>(new Body(HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage()), HttpStatus.BAD_REQUEST);
+                "id must be at least 1"), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -48,7 +48,7 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
     @Data
     @AllArgsConstructor
     private static class Body {
-        private int errorCode;
+        private Integer errorCode;
         private String errorMessage;
     }
 }
