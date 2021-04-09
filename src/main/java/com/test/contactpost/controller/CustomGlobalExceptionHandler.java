@@ -1,21 +1,35 @@
 package com.test.contactpost.controller;
 
 import com.test.contactpost.exception.ContactNotFoundException;
-import javax.validation.ConstraintViolationException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice
 public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler {
+    @Override
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex, HttpHeaders headers,
+            HttpStatus status, WebRequest request) {
+        return new ResponseEntity<>(new Body(HttpStatus.BAD_REQUEST.value(),
+                "Id must be at least 1"), HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex, HttpHeaders headers,
+            HttpStatus status, WebRequest request) {
+        return new ResponseEntity<>(new Body(HttpStatus.BAD_REQUEST.value(),
+                "Id must be numeric"), HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(ContactNotFoundException.class)
     public ResponseEntity<Body> handleContactNotFoundException(
@@ -24,25 +38,10 @@ public class CustomGlobalExceptionHandler extends ResponseEntityExceptionHandler
                 ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<Body> handleConstraintViolationException(
-            ConstraintViolationException ex) {
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Body> handleIllegalArgumentException() {
         return new ResponseEntity<>(new Body(HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage()), HttpStatus.BAD_REQUEST);
-    }
-
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpHeaders headers,
-            HttpStatus status, WebRequest request) {
-        return new ResponseEntity<>(new Body(HttpStatus.BAD_REQUEST.value(),
-                "id must be at least 1"), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<Body> handleMethodArgumentTypeMismatchException() {
-        return new ResponseEntity<>(new Body(HttpStatus.BAD_REQUEST.value(),
-                "Please, enter correct id"), HttpStatus.BAD_REQUEST);
+                "Please, enter correct Id"), HttpStatus.BAD_REQUEST);
     }
 
     @Data

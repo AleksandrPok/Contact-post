@@ -6,7 +6,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.util.IOUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
@@ -36,12 +35,15 @@ public class LoggingDispatcherServlet extends DispatcherServlet {
     private void log(HttpServletRequest requestToCache, HttpServletResponse responseToCache)
             throws IOException {
         StringBuilder sb = new StringBuilder();
-        sb.append(responseToCache.getStatus())
-                .append(requestToCache.getMethod())
-                .append(requestToCache.getRequestURI())
-                .append(requestToCache.getRemoteAddr())
-                .append(getResponsePayload(responseToCache))
-                .append(IOUtils.toString(requestToCache.getReader()));
+        sb.append("httpStatus :").append(responseToCache.getStatus())
+                .append(", path : ").append(requestToCache.getRequestURI())
+                .append(", httpMethod : ").append(requestToCache.getMethod())
+                .append(", clientIp : ").append(requestToCache.getRemoteAddr())
+                .append(", request : ")
+                .append(new String(((ContentCachingRequestWrapper) requestToCache)
+                        .getContentAsByteArray()))
+                .append(", response: ").append(getResponsePayload(responseToCache));
+
         LOGGER.info(sb.toString());
     }
 
